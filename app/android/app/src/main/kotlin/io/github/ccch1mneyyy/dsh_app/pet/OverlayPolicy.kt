@@ -91,11 +91,12 @@ data class PetHost(val ref: String, val label: String, val current: Boolean)
 
 /** The long-press menu's rows (docs/design/pets.md §2.7): shortcuts only where they apply. */
 enum class PetMenuItem {
-    ASK, NEW_CHAT, STOP, SWITCH_HOST, SNOOZE, SETTINGS;
+    ASK, POKE, NEW_CHAT, STOP, SWITCH_HOST, SNOOZE, SETTINGS;
 
     companion object {
         fun of(push: PetPush?): List<PetMenuItem> = buildList {
             add(ASK)
+            add(POKE)
             add(NEW_CHAT)
             if (push?.canStop == true) add(STOP)
             if ((push?.hosts?.size ?: 0) > 1) add(SWITCH_HOST)
