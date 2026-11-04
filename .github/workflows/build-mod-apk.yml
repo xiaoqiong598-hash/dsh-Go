@@ -1,0 +1,51 @@
+# dsh-go mod: build an arm64 APK with its own applicationId
+# (io.github.ccch1mneyyy.dsh_app.mod) so the untouched original app keeps its data.
+# Manual only: Actions → Build mod APK → Run workflow.
+name: Build mod APK
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.7'
+          channel: stable
+          cache: true
+
+      - name: Android SDK licences
+        run: yes | sdkmanager --licenses > /dev/null || true
+
+      - name: Pub get
+        working-directory: app
+        run: flutter pub get
+
+      - name: Build arm64 APK
+        run: |
+          chmod +x tooling/*.sh
+          tooling/build-apk.sh -f arm64 --release
+
+      - name: Show package id
+        run: |
+          APK=$(ls app/build/app/outputs/flutter-apk/app-arm64-release.apk)
+          "$ANDROID_HOME"/build-tools/*/aapt2 dump badging "$APK" | sed -n '1p'
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dsh-go-mod-arm64
+          path: app/build/app/outputs/flutter-apk/app-arm64-release.apk
+          retention-days: 14
