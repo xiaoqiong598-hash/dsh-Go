@@ -130,6 +130,7 @@
     <string name="pet_probe_done">Done</string>
     <string name="pet_probe_public">A turn finished</string>
     <string name="pet_ask">Ask</string>
+    <string name="pet_poke">Pat</string>
     <string name="pet_new_chat">New chat</string>
     <string name="pet_stop">Stop current task</string>
     <string name="pet_switch_host">Switch host</string>
