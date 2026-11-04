@@ -30,6 +30,17 @@ jobs:
       - name: Android SDK licences
         run: yes | sdkmanager --licenses > /dev/null || true
 
+      - name: Bundle runtime from the official release
+        run: |
+          # runtime/build-runtime.sh 要跑整套 rootfs 构建，CI 里太慢；
+          # 同版本的官方包里有现成的 rootfs，直接取过来，gradle 从 runtime/out 读。
+          mkdir -p runtime/out/arm64-v8a/assets/runtime
+          curl -fL --retry 5 -o /tmp/official.apk \
+            https://github.com/ccch1mneyyy/dsh-Go/releases/download/v1.0.10/dsh-go-1.0.10-arm64.apk
+          unzip -q -o /tmp/official.apk 'assets/runtime/*' -d /tmp/rt
+          cp -a /tmp/rt/assets/runtime/. runtime/out/arm64-v8a/assets/runtime/
+          ls -lh runtime/out/arm64-v8a/assets/runtime
+
       - name: Pub get
         working-directory: app
         run: flutter pub get
