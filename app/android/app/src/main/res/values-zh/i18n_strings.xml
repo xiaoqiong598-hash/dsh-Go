@@ -125,6 +125,7 @@
     <string name="pet_probe_done">做完了</string>
     <string name="pet_probe_public">有一轮完成了</string>
     <string name="pet_ask">问一句</string>
+    <string name="pet_poke">摸摸</string>
     <string name="pet_new_chat">新对话</string>
     <string name="pet_stop">停止当前任务</string>
     <string name="pet_switch_host">切换主机</string>
