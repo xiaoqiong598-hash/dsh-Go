@@ -1259,8 +1259,13 @@ internal object PetOverlay {
         return true
     }
 
+    /** dsh-go mod: what a pat says, picked per locale. */
+    private val POKE_LINES_ZH = arrayOf("咕噜……再摸一下", "嗯，尾巴摇起来了", "舒服到冒泡了", "你手心好暖")
+    private val POKE_LINES_EN = arrayOf("Purr… one more pat", "Tail's wagging", "That tickles", "Your hand is warm")
+
     private fun menuLabel(item: PetMenuItem): String = AppStrings.get(app, when (item) {
         PetMenuItem.ASK -> R.string.pet_ask
+        PetMenuItem.POKE -> R.string.pet_poke
         PetMenuItem.NEW_CHAT -> R.string.pet_new_chat
         PetMenuItem.STOP -> R.string.pet_stop
         PetMenuItem.SWITCH_HOST -> R.string.pet_switch_host
@@ -1274,6 +1279,18 @@ internal object PetOverlay {
             PetMenuItem.ASK, PetMenuItem.NEW_CHAT -> {
                 dismissMenu()
                 showAsk(fresh = item == PetMenuItem.NEW_CHAT)
+            }
+            // dsh-go mod: a pat back. Plays the pack's own tickle reaction and says one line;
+            // nothing is sent anywhere, no model call, no state written.
+            PetMenuItem.POKE -> {
+                dismissMenu()
+                react("tickle", loop = false)
+                val ctx = hostContext
+                if (ctx != null) {
+                    val zh = app.resources.configuration.locales[0].language.startsWith("zh")
+                    val line = (if (zh) POKE_LINES_ZH else POKE_LINES_EN).random()
+                    android.widget.Toast.makeText(ctx, line, android.widget.Toast.LENGTH_SHORT).show()
+                }
             }
             PetMenuItem.STOP -> {
                 dismissMenu()
