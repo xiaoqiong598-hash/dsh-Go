@@ -37,7 +37,7 @@ android {
 
     defaultConfig {
         // dsh-go mod: own install identity so the untouched original app keeps its data.
-        applicationId = "io.github.ccch1mneyyy.dsh_app.mod"
+        applicationId = "io.github.ccch1mneyyy.dsh_app.mod2"
         // java.nio.file (symlinks while unpacking the rootfs) needs API 26.
         minSdk = 26
         // Target 28 like Termux, so the API 29+ exec restriction on app-private
