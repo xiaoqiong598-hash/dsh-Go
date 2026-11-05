@@ -1284,12 +1284,26 @@ internal object PetOverlay {
             // nothing is sent anywhere, no model call, no state written.
             PetMenuItem.POKE -> {
                 dismissMenu()
-                react("tickle", loop = false)
+                // 只做宠物自己的动作；台词在真主线程上弹，出错一律吞掉，
+                // 不能让互动把悬浮窗服务带崩（上一版就是这么重启的）。
+                try {
+                    react("tickle", loop = false)
+                } catch (e: Throwable) {
+                    Log.w(TAG, "poke reaction failed", e)
+                }
                 val ctx = hostContext
                 if (ctx != null) {
-                    val zh = app.resources.configuration.locales[0].language.startsWith("zh")
+                    val zh = runCatching {
+                        app.resources.configuration.locales[0].language.startsWith("zh")
+                    }.getOrDefault(false)
                     val line = (if (zh) POKE_LINES_ZH else POKE_LINES_EN).random()
-                    android.widget.Toast.makeText(ctx, line, android.widget.Toast.LENGTH_SHORT).show()
+                    main.post {
+                        try {
+                            android.widget.Toast.makeText(ctx, line, android.widget.Toast.LENGTH_SHORT).show()
+                        } catch (e: Throwable) {
+                            Log.w(TAG, "poke toast failed", e)
+                        }
+                    }
                 }
             }
             PetMenuItem.STOP -> {
