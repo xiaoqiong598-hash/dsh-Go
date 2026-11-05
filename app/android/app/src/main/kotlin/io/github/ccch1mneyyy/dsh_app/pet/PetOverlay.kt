@@ -1284,26 +1284,33 @@ internal object PetOverlay {
             // nothing is sent anywhere, no model call, no state written.
             PetMenuItem.POKE -> {
                 dismissMenu()
-                // 只做宠物自己的动作；台词在真主线程上弹，出错一律吞掉，
-                // 不能让互动把悬浮窗服务带崩（上一版就是这么重启的）。
-                try {
-                    react("tickle", loop = false)
-                } catch (e: Throwable) {
-                    Log.w(TAG, "poke reaction failed", e)
-                }
+                // 桌面悬浮窗里只弹 App 自己的气泡：不播新图集（会重建 Surface，native 崩接不住），
+                // 也不走系统 Toast。气泡放在 evaluate 之后再出现，3 秒后自己收。
                 val ctx = hostContext
                 if (ctx != null) {
                     val zh = runCatching {
                         app.resources.configuration.locales[0].language.startsWith("zh")
                     }.getOrDefault(false)
                     val line = (if (zh) POKE_LINES_ZH else POKE_LINES_EN).random()
-                    main.post {
+                    main.postDelayed({
                         try {
-                            android.widget.Toast.makeText(ctx, line, android.widget.Toast.LENGTH_SHORT).show()
+                            val at = SystemClock.uptimeMillis()
+                            showBubble(
+                                PetBubble(
+                                    id = "poke-$at",
+                                    kind = "poke",
+                                    text = line,
+                                    title = null,
+                                    sessionId = null,
+                                    host = null,
+                                    untilMs = at + 3000,
+                                )
+                            )
+                            main.postDelayed({ removeBubble() }, 3200)
                         } catch (e: Throwable) {
-                            Log.w(TAG, "poke toast failed", e)
+                            Log.w(TAG, "poke bubble failed", e)
                         }
-                    }
+                    }, 120)
                 }
             }
             PetMenuItem.STOP -> {
