@@ -30,6 +30,17 @@ jobs:
       - name: Android SDK licences
         run: yes | sdkmanager --licenses > /dev/null || true
 
+      - name: Signing key (fixed, so later builds upgrade in place)
+        run: |
+          base64 -d .github/mod-signing.p12.b64 > "$RUNNER_TEMP/mod.p12"
+          cat > app/android/key.properties <<EOF
+          storeFile=$RUNNER_TEMP/mod.p12
+          storePassword=dshgomod2026
+          keyAlias=dshgomod
+          keyPassword=dshgomod2026
+          EOF
+          ls -l "$RUNNER_TEMP/mod.p12"
+
       - name: Bundle runtime from the official release
         run: |
           # runtime/build-runtime.sh 要跑整套 rootfs 构建，CI 里太慢；
